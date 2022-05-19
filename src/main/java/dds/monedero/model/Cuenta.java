@@ -11,7 +11,8 @@ import java.util.List;
 
 public class Cuenta {
 
-  private double saldo = 0;
+  // No es necesario inicializar saldo en 0, ya que el valor se inicializa en el constructor de la clase
+  private double saldo;
   private List<Movimiento> movimientos = new ArrayList<>();
 
   public Cuenta() {
@@ -27,18 +28,17 @@ public class Cuenta {
   }
 
   public void poner(double cuanto) {
-    if (cuanto <= 0) {
-      throw new MontoNegativoException(cuanto + ": el monto a ingresar debe ser un valor positivo");
-    }
+    // Agrego funciones de validación que lanzan excepciones en casos no deseados.
 
-    if (getMovimientos().stream().filter(movimiento -> movimiento.isDeposito()).count() >= 3) {
-      throw new MaximaCantidadDepositosException("Ya excedio los " + 3 + " depositos diarios");
-    }
+    this.validarMontoNegativo(cuanto);
+
+    this.validarCantidadDeDepositos();
 
     new Movimiento(LocalDate.now(), cuanto, true).agregateA(this);
   }
 
   public void sacar(double cuanto) {
+    this.validarMontoNegativo(cuanto);
     if (cuanto <= 0) {
       throw new MontoNegativoException(cuanto + ": el monto a ingresar debe ser un valor positivo");
     }
@@ -78,4 +78,15 @@ public class Cuenta {
     this.saldo = saldo;
   }
 
+  public void validarMontoNegativo(double cuanto) {
+    if (cuanto <= 0) {
+      throw new MontoNegativoException(cuanto + ": el monto a ingresar debe ser un valor positivo");
+    }
+  }
+
+  public void validarCantidadDeDepositos() {
+    if (this.getMovimientos().stream().filter(movimiento -> movimiento.isDeposito()).count() >= 3) {
+      throw new MaximaCantidadDepositosException("Ya excedio los " + 3 + " depositos diarios");
+    }
+  }
 }
